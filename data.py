@@ -789,7 +789,8 @@ class TinyImageNetData(pl.LightningDataModule):
     def train_dataloader(self):
         transform = transforms.Compose(
             [
-                transforms.RandomResizedCrop(56),
+                transforms.Resize(48),
+                transforms.RandomResizedCrop(32),
                 transforms.ToTensor(),
                 transforms.Normalize(self.mean, self.std),
             ]
@@ -808,7 +809,8 @@ class TinyImageNetData(pl.LightningDataModule):
     def val_dataloader(self):
         transform = transforms.Compose(
             [
-                transforms.CenterCrop(56),
+                transforms.Resize(48),
+                transforms.CenterCrop(32),
                 transforms.ToTensor(),
                 transforms.Normalize(self.mean, self.std),
             ]
