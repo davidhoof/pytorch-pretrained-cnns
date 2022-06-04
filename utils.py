@@ -5,42 +5,47 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 class ExtendedModelCheckpoint(ModelCheckpoint):
-    
     CHECKPOINT_NAME_FIRST = "first"
-    
+
     def __init__(self, save_first=False, **kwargs):
         super().__init__(**kwargs)
         self.save_first = save_first
-    
+
     def on_train_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         super().on_train_start(trainer, pl_module)
         if self.save_first:
             monitor_candidates = self._monitor_candidates(trainer)
             filepath = self.format_checkpoint_name(monitor_candidates, self.CHECKPOINT_NAME_FIRST)
             self._save_checkpoint(trainer, filepath)
-        
+
+
+class MyCheckPoint(ExtendedModelCheckpoint):
+    def __init__(self, **kwargs):
+        super(MyCheckPoint, self).__init__(save_first=False, **kwargs)
+
 
 class CloneProgress(RemoteProgress):
     def update(self, op_code, cur_count, max_count=None, message=''):
         pbar = tqdm(total=max_count)
         pbar.update(cur_count)
 
-    
+
 class NormalizedModel(torch.nn.Module):
-    
+
     def __init__(self, model, mean, std):
         super(NormalizedModel, self).__init__()
         self.model = model
         self.mean = torch.nn.Parameter(torch.Tensor(mean).view(-1, 1, 1), requires_grad=False)
         self.std = torch.nn.Parameter(torch.Tensor(std).view(-1, 1, 1), requires_grad=False)
-        
+
     def forward(self, x):
-        out = (x - self.mean) / self.std 
+        out = (x - self.mean) / self.std
         out = self.model(out)
         return out
-    
-    
-def none_or_str(value):  # from https://stackoverflow.com/questions/48295246/how-to-pass-none-keyword-as-command-line-argument
+
+
+def none_or_str(
+        value):  # from https://stackoverflow.com/questions/48295246/how-to-pass-none-keyword-as-command-line-argument
     if value == 'None':
         return None
     return value
