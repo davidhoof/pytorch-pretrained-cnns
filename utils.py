@@ -19,9 +19,9 @@ class ExtendedModelCheckpoint(ModelCheckpoint):
             self._save_checkpoint(trainer, filepath)
 
 
-class MyCheckPoint(ExtendedModelCheckpoint):
+class MyCheckpoint(ExtendedModelCheckpoint):
     def __init__(self, **kwargs):
-        super(MyCheckPoint, self).__init__(save_first=False, **kwargs)
+        super(MyCheckpoint, self).__init__(save_first=False, **kwargs)
 
 
 class CloneProgress(RemoteProgress):
