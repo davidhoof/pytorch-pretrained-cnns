@@ -15,7 +15,9 @@ import wandb
 
 def start_training(args):
     seed_everything(args["seed"])
-    os.environ["CUDA_VISIBLE_DEVICES"] = args["gpu_id"]
+
+    if not args['wandb_sweep']:
+        os.environ["CUDA_VISIBLE_DEVICES"] = args["gpu_id"]
 
     data_dir = os.path.join(args["data_dir"], args["dataset"])
     data = datasets.get_dataset(args["dataset"])(data_dir, args["batch_size"], args["num_workers"])
@@ -59,9 +61,13 @@ def start_training(args):
     loggers.append(csv_logger)
 
     if args["wandb"]:
-        wandb_logger = WandbLogger(project=args["wandb"], log_model=False)
-        wandb.run.name = f"{args['classifier']}-{args['dataset']}-{wandb.run.id}"
-        wandb.run.save()
+        if args['wandb_sweep']:
+            run = wandb.init(project=args["wandb"], config=args)
+            wandb_logger = WandbLogger(experiment=run, log_model=True)
+        else:
+            wandb_logger = WandbLogger(project=args["wandb"], log_model=False)
+            wandb.run.name = f"{args['classifier']}-{args['dataset']}-{wandb.run.id}"
+            wandb.run.save()
         loggers.append(wandb_logger)
 
     callbacks = []
@@ -168,6 +174,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", type=str2bool, default=False)
     parser.add_argument("--profiler", type=str, default=None)
     parser.add_argument("--wandb", type=str, default=None)
+    parser.add_argument("--wandb_sweep", type=str2bool, default=False)
 
     parser.add_argument("--extra1", type=str, default=None)
     parser.add_argument("--extra2", type=str, default=None)

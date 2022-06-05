@@ -1,0 +1,38 @@
+import os
+from argparse import ArgumentParser
+import json
+import argparse
+
+from utils import none_or_str
+from train import main as train_main
+
+defaults = {
+    "model": {{ model }},
+    "dataset": {{ dataset }},
+    "load_checkpoint": {{ checkpoint }},
+    "replace_fc": True,
+    "num_workers": 4,
+    "checkpoints": "last_best",
+    "wandb": {{ project_name }},
+    "wandb_sweep": True
+}
+
+
+def main(args):
+    config = dict()
+    config.update(args)
+    config.update(defaults)
+    train_main(config)
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--batch_size", type=int, default=512)
+    parser.add_argument("--max_epochs", type=int, default=100)
+    parser.add_argument("--learning_rate", type=float, default=1e-2)
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--optimizer", type=str, default="sgd", choices=["adam", "sgd", "adagrad", "rmsprop", "adamw"])
+    parser.add_argument("--scheduler", type=none_or_str, default=None,
+                        choices=["WarmupCosine", "Step", "FrankleStep", "None", None])
+    _args = parser.parse_args()
+    main(_args)

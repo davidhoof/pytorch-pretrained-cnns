@@ -1,0 +1,38 @@
+setup:
+  username: "davidhoof"
+  output_dir: "C:/temp/python_files_sweep"
+  project_format_string: "testSWEEP{dataset}"
+  models: ["lowres_resnet9","lowres_resnet50","lowres_densenet121","lowres_vgg16_bn"]
+  datasets: ["cifar10"]
+  checkpoints:
+    - dataset_trained_on: "cifar10"
+      version: 0
+    - dataset_trained_on: "cifar100"
+      version: 0
+    - dataset_trained_on: "grocerystore"
+      version: 0
+    - dataset_trained_on: "svhn"
+      version: 0
+    - dataset_trained_on: "tinyimagenet"
+      version: 0
+hyperparameters:
+  method: bayes
+  metric:
+    name: acc/val
+    goal: maximize
+  parameters:
+    learning_rate:
+      min: 0.0001
+      max: 0.1
+    optimizer:
+      values: ["adam", "sgd", "adagrad", "rmsprop", "adamw"]
+    batch_size:
+      value: 128
+    scheduler:
+      value: "None"
+    max_epochs:
+      min: 10
+      max: 60
+    weight_decay:
+      min: 0.0001
+      max: 0.1
