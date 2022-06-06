@@ -2,25 +2,29 @@ import os
 from argparse import ArgumentParser
 import json
 import argparse
+import sys
 
+sys.path.append("{{ sys_path }}")
 from utils import none_or_str
 from train import main as train_main
 
 defaults = {
-    "data_dir": {{ data_dir }},
-    "output_dir": {{ output_dir }},
-    "model": {{ model }},
-    "dataset": {{ dataset }},
+    "data_dir": "{{ data_dir }}",
+    "output_dir": "{{ output_dir }}",
+    "model": "{{ model }}",
+    "dataset": "{{ dataset }}",
     "load_checkpoint": {{ checkpoint }},
     "replace_fc": True,
     "num_workers": 4,
     "checkpoints": "last_best",
-    "wandb": {{ project_name }},
+    "wandb": "{{ project_name }}",
     "wandb_sweep": True
 }
 
 
 def main(args):
+    if type(args) is not dict:
+        args = vars(args)
     config = dict()
     config.update(args)
     config.update(defaults)

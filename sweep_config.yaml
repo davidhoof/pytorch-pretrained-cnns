@@ -1,10 +1,10 @@
 wandb:
-  username: "davidhoof"
-  sweep_dir: "C:/temp/python_files_sweep"
+  username: "dhoof"
+  sweep_dir: "../python_files_sweep"
 setup:
   project_format_string: "testSWEEP{dataset}"
-  data_dir: "./datasets"
-  output_dir: "./output"
+  data_dir: "../datasets"
+  output_dir: "../output"
   models: ["lowres_resnet9","lowres_resnet50","lowres_densenet121","lowres_vgg16_bn"]
   datasets: ["cifar10"]
   checkpoints:
@@ -39,3 +39,5 @@ hyperparameters:
     weight_decay:
       min: 0.0001
       max: 0.1
+    mode:
+      value: "train"

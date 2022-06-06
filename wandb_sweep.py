@@ -48,7 +48,9 @@ def main(args):
                             checkpoint=checkpoint,
                             project_name=project_name,
                             data_dir=os.path.abspath(setup['data_dir']),
-                            output_dir=os.path.abspath(setup['output_dir']))
+                            output_dir=os.path.abspath(setup['output_dir']),
+                            sys_path=os.path.abspath(os.getcwd())
+                        )
                     )
 
                 hyperparameters.update({"name": sweep_name})
