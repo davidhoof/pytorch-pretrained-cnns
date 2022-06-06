@@ -1,13 +1,31 @@
 wandb:
   username: "dhoof"
   sweep_dir: "../python_files_sweep"
-setup:
   project_format_string: "testSWEEP{dataset}"
+setup:
+  mode: "train"
   data_dir: "../datasets"
+  checkpoints: "last_best"
+  reset_head: False
+  replace_fc: True
   output_dir: "../output"
+  postfix: ""
+  precision: 32
+  num_workers: 4
+  cudnn_non_deterministic: True
+  gpu_id: 0
+  momentum: 0.9
+  freeze: None
+  cutmix_prob: 0
+  seed: 0
+  verbose: False
+  profiler: None
+  wandb_sweep: True
+  extra1: None
+  extra2: None
   models: ["lowres_resnet9","lowres_resnet50","lowres_densenet121","lowres_vgg16_bn"]
   datasets: ["cifar10"]
-  checkpoints:
+  checkpoint_inputs:
     - dataset_trained_on: "cifar10"
       version: 0
     - dataset_trained_on: "cifar100"
@@ -39,5 +57,3 @@ hyperparameters:
     weight_decay:
       min: 0.0001
       max: 0.1
-    mode:
-      value: "train"
