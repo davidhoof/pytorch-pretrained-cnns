@@ -10,7 +10,7 @@ from train import main as train_main
 
 defaults = {
 {% for key, value in defaults.items() %}
-    "{{ key }}": {% if type(value) == str %}"{{ value }}",{% else %}{{ value }},{% endif %}{% endfor %}
+    "{{ key }}": {% if type(value) == str and value != "None" %}"{{ value }}",{% elif value == "None" %}None,{% else %}{{ value }},{% endif %}{% endfor %}
 }
 
 

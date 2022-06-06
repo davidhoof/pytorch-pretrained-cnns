@@ -46,11 +46,11 @@ def main(args):
                 defaults['classifier'] = model
                 del defaults['models']
                 defaults['dataset'] = dataset
-                del defaults['datasets']
+                del defaults['datasets']                
                 defaults['load_checkpoint'] = os.path.abspath(glob.glob(
                     os.path.join(
                         setup['output_dir'],
-                        f"/{checkpoint['dataset_trained_on']}/{model}/version_{checkpoint['version']}/checkpoints/*.ckpt")
+                        f"{checkpoint['dataset_trained_on']}/{model}/version_{checkpoint['version']}/checkpoints/*.ckpt")
                 )[0])
                 del defaults['checkpoint_inputs']
                 defaults['data_dir'] = os.path.abspath(setup['data_dir'])

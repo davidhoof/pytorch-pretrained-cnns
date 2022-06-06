@@ -60,14 +60,10 @@ def start_training(args):
     csv_logger.save()
     loggers.append(csv_logger)
 
-    if args["wandb"]:
-        if args['wandb_sweep']:
-            run = wandb.init(project=args["wandb"], config=args)
-            wandb_logger = WandbLogger(experiment=run, log_model=True)
-        else:
-            wandb_logger = WandbLogger(project=args["wandb"], log_model=False)
-            wandb.run.name = f"{args['classifier']}-{args['dataset']}-{wandb.run.id}"
-            wandb.run.save()
+    if args["wandb"]:        
+        wandb_logger = WandbLogger(project=args["wandb"], log_model=False)
+        wandb.run.name = f"{args['classifier']}-{args['dataset']}-{wandb.run.id}"
+        wandb.run.save()
         loggers.append(wandb_logger)
 
     callbacks = []
