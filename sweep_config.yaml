@@ -1,7 +1,10 @@
-setup:
+wandb:
   username: "davidhoof"
-  output_dir: "C:/temp/python_files_sweep"
+  sweep_dir: "C:/temp/python_files_sweep"
+setup:
   project_format_string: "testSWEEP{dataset}"
+  data_dir: "./datasets"
+  output_dir: "./output"
   models: ["lowres_resnet9","lowres_resnet50","lowres_densenet121","lowres_vgg16_bn"]
   datasets: ["cifar10"]
   checkpoints:

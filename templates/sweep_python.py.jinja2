@@ -7,6 +7,8 @@ from utils import none_or_str
 from train import main as train_main
 
 defaults = {
+    "data_dir": {{ data_dir }},
+    "output_dir": {{ output_dir }},
     "model": {{ model }},
     "dataset": {{ dataset }},
     "load_checkpoint": {{ checkpoint }},
