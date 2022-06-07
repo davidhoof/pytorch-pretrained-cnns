@@ -68,7 +68,7 @@ def main(args):
                     )
 
                 hyperparameters.update({"name": sweep_name})
-                hyperparameters.update({"program": os.path.join(save_folder, f"{sweep_name}.py")})
+                hyperparameters.update({"program": os.path.abspath(os.path.join(save_folder, f"{sweep_name}.py"))})
                 sweep_id = wandb.sweep(hyperparameters, project=project_name)
 
                 with open(os.path.join(wandb_config['sweep_dir'], project_name,

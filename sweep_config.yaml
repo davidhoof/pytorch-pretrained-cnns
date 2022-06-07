@@ -1,17 +1,17 @@
 wandb:
   username: "dhoof"
   sweep_dir: "../python_files_sweep"
-  project_format_string: "testSWEEP{dataset}"
-setup:
+  project_format_string: "test2SWEEP{dataset}"
+setup:  
   mode: "train"
   data_dir: "../datasets"
-  checkpoints: "last_best"
+  checkpoints: "all"
   reset_head: False
   replace_fc: True
   output_dir: "../output"
   postfix: ""
   precision: 32
-  num_workers: 4
+  num_workers: 8
   cudnn_non_deterministic: True
   gpu_id: 0
   momentum: 0.9
@@ -43,7 +43,7 @@ hyperparameters:
     goal: maximize
   parameters:
     learning_rate:
-      min: 0.0001
+      min: 0.00001
       max: 0.1
     optimizer:
       values: ["adam", "sgd", "adagrad", "rmsprop", "adamw"]
