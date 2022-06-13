@@ -1,9 +1,11 @@
+import glob
 import json
 import os
 from collections import defaultdict
 
 import git
 import numpy as np
+import scipy.io
 import pandas as pd
 import pytorch_lightning as pl
 from PIL import Image
@@ -12,6 +14,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, KMNIST, FashionMNIST, ImageFolder, SVHN, SUN397
 from torchvision.datasets.utils import download_and_extract_archive
+from torchvision.datasets.utils import download_url
 
 from utils import CloneProgress
 
@@ -168,7 +171,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="train", transform=transform,download=True)
+        dataset = GroceryStore(root=self.root_dir, split="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -188,7 +191,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="val", transform=transform,download=True)
+        dataset = GroceryStore(root=self.root_dir, split="val", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -438,6 +441,104 @@ class HistAerial100x100Data(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             sampler=valid_sampler,
+            drop_last=False,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def test_dataloader(self):
+        return self.val_dataloader()
+
+
+class Flowers(Dataset):
+    _DATASET_URL = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz"
+    _LABELS_URL = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/imagelabels.mat"
+    _DATASET_MD5 = "52808999861908f626f3c1f4e79d11fa"
+    _LABELS_MD5 = "e0620be6f572b9609742df49c70aed4d"
+    _LABELS_FILE_NAME = "imagelabels.mat"
+
+    def __init__(self, root, split="train", transform=None, download=False):
+        assert split in ['train', 'val']
+        self.root = root
+        self.samples = []
+        self.transform = transform
+
+        if download:
+            self._download()
+        if not self._check_exists():
+            raise RuntimeError("Dataset not found. You can use download=True to download it")
+
+        paths = glob.glob(os.path.join(self.root, "jpg", "*.jpg"))
+        labels = list(scipy.io.loadmat(os.path.join(self.root, self._LABELS_FILE_NAME))['labels'])[0]
+
+        self.samples = list(zip(paths, labels))
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        s = self.samples[idx]
+        img_name = os.path.join(s[0])
+        x = Image.open(img_name)
+        if self.transform:
+            x = self.transform(x)
+        return x, s[1]
+
+    def _check_exists(self) -> bool:
+        return os.path.exists(self.root)
+
+    def _download(self) -> None:
+        if self._check_exists():
+            return
+        download_and_extract_archive(self._DATASET_URL, download_root=self.root, md5=self._DATASET_MD5)
+        download_url(self._LABELS_URL, root=self.root, md5=self._LABELS_URL)
+
+
+class FlowersData(pl.LightningDataModule):
+    def __init__(self, root_dir, batch_size, num_workers):
+        super().__init__()
+        self.root_dir = root_dir
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.mean = (0.5948, 0.4397, 0.3666)
+        self.std = (0.2670, 0.2391, 0.2838)
+        self.num_classes = 102
+        self.in_channels = 3
+
+    def train_dataloader(self):
+        transform = transforms.Compose(
+            [
+                transforms.Resize(48),
+                transforms.RandomResizedCrop(32),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(self.mean, self.std),
+            ]
+        )
+        dataset = Flowers(root=self.root_dir, split="train", transform=transform, download=True)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            shuffle=True,
+            drop_last=False,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def val_dataloader(self):
+        transform = transforms.Compose(
+            [
+                transforms.Resize(32),
+                transforms.ToTensor(),
+                transforms.Normalize(self.mean, self.std),
+            ]
+        )
+        dataset = Flowers(root=self.root_dir, split="val", transform=transform, download=True)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
             drop_last=False,
             pin_memory=True,
         )
@@ -794,7 +895,7 @@ class TinyImageNetData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = TinyImageNet(root=self.root_dir, mode="train", transform=transform,download=True)
+        dataset = TinyImageNet(root=self.root_dir, mode="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -1096,7 +1197,8 @@ all_datasets = {
     "histaerial25x25": HistAerial25x25Data,
     "histaerial50x50": HistAerial50x50Data,
     "histaerial100x100": HistAerial100x100Data,
-    "fractaldb60": FractalDB60Data
+    "fractaldb60": FractalDB60Data,
+    "flowers": FlowersData
 }
 
 
