@@ -20,8 +20,13 @@ def start_training(args):
         os.environ["CUDA_VISIBLE_DEVICES"] = args["gpu_id"]
 
     data_dir = os.path.join(args["data_dir"], args["dataset"])
-    data = datasets.get_dataset(args["dataset"])(data_dir, args["batch_size"], args["num_workers"])
+    data = None
 
+    if args['dataset_percentage'] == 100:
+        data = datasets.get_dataset(args["dataset"])(data_dir, args["batch_size"], args["num_workers"])
+    if 100 > args['dataset_percentage'] > 0:
+        data = datasets.get_dataset_minimized(args["dataset"])(data_dir, args["batch_size"], args["num_workers"],
+                                                               args['dataset_percentage'])
     args["num_classes"] = data.num_classes
     args["in_channels"] = data.in_channels
 
@@ -60,7 +65,7 @@ def start_training(args):
     csv_logger.save()
     loggers.append(csv_logger)
 
-    if args["wandb"]:        
+    if args["wandb"]:
         wandb_logger = WandbLogger(project=args["wandb"], log_model=False)
         wandb.run.name = f"{args['classifier']}-{args['dataset']}-{wandb.run.id}"
         wandb.run.save()
@@ -153,6 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--num_workers", type=int, default=min(8, os.cpu_count()))
+    parser.add_argument("--dataset_percentage", type=check_in_range, default=100)
     parser.add_argument("--cudnn_non_deterministic", type=str2bool, default=True)
     parser.add_argument("--gpu_id", type=str, default="0")
 

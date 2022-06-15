@@ -1,11 +1,13 @@
 import json
 import os
+import random
 from collections import defaultdict
 
 import git
 import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
+import torch.utils.data
 from PIL import Image
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torch.utils.data import Dataset
@@ -168,7 +170,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="train", transform=transform,download=True)
+        dataset = GroceryStore(root=self.root_dir, split="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -188,7 +190,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="val", transform=transform,download=True)
+        dataset = GroceryStore(root=self.root_dir, split="val", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -597,6 +599,83 @@ class CIFAR10Data(pl.LightningDataModule):
         return self.val_dataloader()
 
 
+class MinimizedCIFAR10Data(pl.LightningDataModule):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__()
+        self.root_dir = root_dir
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.dataset_size = dataset_size
+        self.random_value = random.randint(0, dataset_size)
+        self.mean = (0.49139968, 0.48215841, 0.44653091)
+        self.std = (0.24703223, 0.24348513, 0.26158784)
+        self.num_classes = 10
+        self.in_channels = 3
+
+    def train_dataloader(self):
+        transform = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(self.mean, self.std),
+            ]
+        )
+
+        dataset = CIFAR10(root=self.root_dir, train=True, transform=transform, download=True)
+
+        num_train = len(dataset)
+        indices = list(range(num_train))
+        split = int(np.floor((self.dataset_size / 100) * num_train))
+
+        dataset_idx = indices[0 + self.dataset_size * int(
+            self.random_value % np.floor(100 / self.dataset_size)):split + self.dataset_size * int(
+            self.random_value % np.floor(100 / self.dataset_size))]
+
+        dataset = torch.utils.data.Subset(dataset, dataset_idx)
+
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            shuffle=True,
+            drop_last=False,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def val_dataloader(self):
+        transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(self.mean, self.std),
+            ]
+        )
+        dataset = CIFAR10(root=self.root_dir, train=False, transform=transform, download=True)
+
+        num_train = len(dataset)
+        indices = list(range(num_train))
+        split = int(np.floor((self.dataset_size / 100) * num_train))
+
+        dataset_idx = indices[0 + self.dataset_size * int(
+            self.random_value % np.floor(100 / self.dataset_size)):split + self.dataset_size * int(
+            self.random_value % np.floor(100 / self.dataset_size))]
+
+        dataset = torch.utils.data.Subset(dataset, dataset_idx)
+
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            drop_last=False,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def test_dataloader(self):
+        return self.val_dataloader()
+
+
 class SUN397Data(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size, num_workers):
         super().__init__()
@@ -794,7 +873,7 @@ class TinyImageNetData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = TinyImageNet(root=self.root_dir, mode="train", transform=transform,download=True)
+        dataset = TinyImageNet(root=self.root_dir, mode="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -1099,6 +1178,14 @@ all_datasets = {
     "fractaldb60": FractalDB60Data
 }
 
+all_datasets_minimized = {
+    "cifar10": MinimizedCIFAR10Data
+}
+
 
 def get_dataset(name):
     return all_datasets.get(name)
+
+
+def get_dataset_minimized(name):
+    return all_datasets_minimized.get(name)

@@ -64,3 +64,10 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def check_in_range(value):
+    ivalue = int(value)
+    if 0 < ivalue <= 100:
+        raise argparse.ArgumentTypeError(f"{value} is an invalid int value. Value has to be between 1 and 100")
+    return ivalue
