@@ -3,6 +3,7 @@ from git import RemoteProgress
 import torch
 from tqdm import tqdm
 from pytorch_lightning.callbacks import ModelCheckpoint
+import argparse
 
 
 class ExtendedModelCheckpoint(ModelCheckpoint):
@@ -69,7 +70,7 @@ def str2bool(v):
 
 def check_in_range(value):
     ivalue = int(value)
-    if 0 < ivalue <= 100:
+    if not (0 < ivalue <= 100):
         raise argparse.ArgumentTypeError(f"{value} is an invalid int value. Value has to be between 1 and 100")
     return ivalue
 
