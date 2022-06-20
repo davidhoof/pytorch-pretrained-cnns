@@ -1,3 +1,4 @@
+import numpy as np
 from git import RemoteProgress
 import torch
 from tqdm import tqdm
@@ -71,3 +72,18 @@ def check_in_range(value):
     if 0 < ivalue <= 100:
         raise argparse.ArgumentTypeError(f"{value} is an invalid int value. Value has to be between 1 and 100")
     return ivalue
+
+
+def minimize_dataset(dataset_func, dataset_size=10, random_value=0):
+    def modified_dataset(**kwargs):
+        dataset = dataset_func(**kwargs)
+        num_train = len(dataset)
+        indices = list(range(num_train))
+        split = int(np.floor((dataset_size / 100) * num_train))
+
+        dataset_idx = indices[0 + dataset_size * int(
+            random_value % np.floor(100 / dataset_size)):split + dataset_size * int(
+            random_value % np.floor(100 / dataset_size))]
+        return torch.utils.data.Subset(dataset, dataset_idx)
+
+    return modified_dataset
