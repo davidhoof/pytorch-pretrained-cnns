@@ -4,7 +4,7 @@ import json
 import argparse
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers import CSVLogger, WandbLogger
-from pytorch_lightning.callbacks import RichProgressBar
+from pytorch_lightning.callbacks import RichProgressBar, LearningRateMonitor
 from module import TrainModule
 import data as datasets
 import models
@@ -72,6 +72,11 @@ def start_training(args):
         loggers.append(wandb_logger)
 
     callbacks = []
+
+    lr_monitor = LearningRateMonitor(log_momentum=True)
+    callbacks.append(lr_monitor)
+    time_monitor = TimeMonitor()
+    callbacks.append(time_monitor)
 
     if args["checkpoints"]:
         checkpoint_cb = ExtendedModelCheckpoint(save_first=True, monitor="acc/val", mode="max", save_top_k=1,
@@ -157,6 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument("--max_epochs", type=int, default=100)
+    parser.add_argument("--start_step", type=int, default=0)
     parser.add_argument("--num_workers", type=int, default=min(8, os.cpu_count()))
     parser.add_argument("--dataset_percentage", type=check_in_range, default=100)
     parser.add_argument("--cudnn_non_deterministic", type=str2bool, default=True)
