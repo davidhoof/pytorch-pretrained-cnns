@@ -465,8 +465,7 @@ class Flowers(Dataset):
     _LABELS_MD5 = "e0620be6f572b9609742df49c70aed4d"
     _LABELS_FILE_NAME = "imagelabels.mat"
 
-    def __init__(self, root, split="train", transform=None, download=False):
-        assert split in ['train', 'val']
+    def __init__(self, root, transform=None, download=False):
         self.root = root
         self.samples = []
         self.transform = transform
@@ -505,6 +504,7 @@ class Flowers(Dataset):
 class FlowersData(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size, num_workers):
         super().__init__()
+        self.valid_size = 0.15
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -524,12 +524,21 @@ class FlowersData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = self.data_class(root=self.root_dir, split="train", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
+
+        num_train = len(dataset)
+        indices = list(range(num_train))
+        split = int(np.floor(self.valid_size * num_train))
+
+        train_idx = indices[split:]
+        train_sampler = SubsetRandomSampler(train_idx)
+
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            shuffle=True,
+            sampler=train_sampler,
+            shuffle=False,
             drop_last=False,
             pin_memory=True,
         )
@@ -543,11 +552,20 @@ class FlowersData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = self.data_class(root=self.root_dir, split="val", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
+
+        num_train = len(dataset)
+        indices = list(range(num_train))
+        split = int(np.floor(self.valid_size * num_train))
+
+        valid_idx = indices[:split]
+        valid_sampler = SubsetRandomSampler(valid_idx)
+
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
+            sampler=valid_sampler,
             drop_last=False,
             pin_memory=True,
         )
@@ -1327,10 +1345,12 @@ class RandomMinimizedTinyImageNetData(TinyImageNetData):
         super().__init__(root_dir, batch_size, num_workers)
         self.data_class = utils.minimize_dataset(TinyImageNet, dataset_size, random.randint(0, dataset_size))
 
+
 class RandomMinimizedFlowersData(FlowersData):
     def __init__(self, root_dir, batch_size, num_workers, dataset_size):
         super().__init__(root_dir, batch_size, num_workers)
         self.data_class = utils.minimize_dataset(Flowers, dataset_size, random.randint(0, dataset_size))
+
 
 class RandomMinimizedCUB2002011Data(CUB2002011Data):
     def __init__(self, root_dir, batch_size, num_workers, dataset_size):
