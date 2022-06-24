@@ -477,7 +477,6 @@ class Flowers(Dataset):
 
         paths = glob.glob(os.path.join(self.root, "jpg", "*.jpg"))
         labels = list(scipy.io.loadmat(os.path.join(self.root, self._LABELS_FILE_NAME))['labels'])[0]
-
         self.samples = list(zip(paths, labels))
 
     def __len__(self):
@@ -547,7 +546,8 @@ class FlowersData(pl.LightningDataModule):
     def val_dataloader(self):
         transform = transforms.Compose(
             [
-                transforms.Resize(32),
+                transforms.Resize(48),
+                transforms.CenterCrop(32),
                 transforms.ToTensor(),
                 transforms.Normalize(self.mean, self.std),
             ]
