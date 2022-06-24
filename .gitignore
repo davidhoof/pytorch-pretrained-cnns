@@ -145,3 +145,4 @@ dmypy.json
 .idea/inspectionProfiles/Project_Default.xml
 .idea/other.xml
 .idea/workspace.xml
+/wandb/

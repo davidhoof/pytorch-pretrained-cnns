@@ -1,11 +1,13 @@
 import json
 import os
+import random
 from collections import defaultdict
 
 import git
 import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
+import torch.utils.data
 from PIL import Image
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torch.utils.data import Dataset
@@ -13,6 +15,7 @@ from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, KMNIST, FashionMNIST, ImageFolder, SVHN, SUN397
 from torchvision.datasets.utils import download_and_extract_archive
 
+import utils
 from utils import CloneProgress
 
 
@@ -153,6 +156,7 @@ class GroceryStoreData(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = GroceryStore
         self.mean = (0.5525, 0.4104, 0.2445)
         self.std = (0.2205, 0.1999, 0.1837)
         self.num_classes = 43  # needs to be one more than the 42 classes because its start with a 0. Dont ask why
@@ -168,7 +172,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="train", transform=transform,download=True)
+        dataset = self.data_class(root=self.root_dir, split="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -188,7 +192,7 @@ class GroceryStoreData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = GroceryStore(root=self.root_dir, split="val", transform=transform,download=True)
+        dataset = self.data_class(root=self.root_dir, split="val", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -234,6 +238,7 @@ class HistAerial25x25Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = HistAerial
         self.mean = (0.5525, 0.4104, 0.2445)
         self.std = (0.2205, 0.1999, 0.1837)
         self.num_classes = 7
@@ -248,7 +253,7 @@ class HistAerial25x25Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="25x25", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="25x25", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -276,7 +281,7 @@ class HistAerial25x25Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="25x25", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="25x25", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -306,6 +311,7 @@ class HistAerial50x50Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = HistAerial
         self.mean = (0.4625, 0.4625, 0.4625)
         self.std = (0.2764, 0.2764, 0.2764)
         self.num_classes = 7
@@ -321,7 +327,7 @@ class HistAerial50x50Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="50x50", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="50x50", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -350,7 +356,7 @@ class HistAerial50x50Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="50x50", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="50x50", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -380,6 +386,7 @@ class HistAerial100x100Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = HistAerial
         self.mean = (0.4616, 0.4616, 0.4616)
         self.std = (0.2759, 0.2759, 0.2759)
         self.num_classes = 42
@@ -395,7 +402,7 @@ class HistAerial100x100Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="100x100", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="100x100", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -424,7 +431,7 @@ class HistAerial100x100Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = HistAerial(root=self.root_dir, dataset_type="100x100", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, dataset_type="100x100", transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -478,6 +485,7 @@ class FractalDB60Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = FractalDB60
         self.mean = (0.0622, 0.0622, 0.0622)
         self.std = (0.1646, 0.1646, 0.1646)
         self.num_classes = 60
@@ -493,7 +501,7 @@ class FractalDB60Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = FractalDB60(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -522,7 +530,7 @@ class FractalDB60Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = FractalDB60(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -551,6 +559,7 @@ class CIFAR10Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = CIFAR10
         self.mean = (0.49139968, 0.48215841, 0.44653091)
         self.std = (0.24703223, 0.24348513, 0.26158784)
         self.num_classes = 10
@@ -565,7 +574,7 @@ class CIFAR10Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR10(root=self.root_dir, train=True, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, train=True, transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -583,7 +592,7 @@ class CIFAR10Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR10(root=self.root_dir, train=False, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, train=False, transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -603,6 +612,7 @@ class SUN397Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = SUN397
         self.mean = (0.485, 0.456, 0.406)
         self.std = (0.229, 0.224, 0.225)
         self.num_classes = 899
@@ -617,7 +627,7 @@ class SUN397Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = SUN397(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -646,7 +656,7 @@ class SUN397Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = SUN397(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -781,6 +791,7 @@ class TinyImageNetData(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = TinyImageNet
         self.mean = (0.4802, 0.4481, 0.3975)
         self.std = (0.2764, 0.2689, 0.2816)
         self.num_classes = 200
@@ -794,7 +805,7 @@ class TinyImageNetData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = TinyImageNet(root=self.root_dir, mode="train", transform=transform,download=True)
+        dataset = self.data_class(root=self.root_dir, mode="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -813,7 +824,7 @@ class TinyImageNetData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = TinyImageNet(root=self.root_dir, mode="val", transform=transform)
+        dataset = self.data_class(root=self.root_dir, mode="val", transform=transform)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -831,7 +842,7 @@ class TinyImageNetData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = TinyImageNet(root=self.root_dir, mode="test", transform=transform)
+        dataset = self.data_class(root=self.root_dir, mode="test", transform=transform)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -848,6 +859,7 @@ class SVHNData(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = SVHN
         self.mean = (0.4377, 0.4438, 0.4728)
         self.std = (0.1980, 0.2010, 0.1970)
         self.num_classes = 10
@@ -860,7 +872,7 @@ class SVHNData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = SVHN(root=self.root_dir, split="train", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, split="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -878,7 +890,7 @@ class SVHNData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = SVHN(root=self.root_dir, split="test", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, split="test", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -898,6 +910,7 @@ class CIFAR100Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = CIFAR100
         self.mean = (0.50707516, 0.48654887, 0.44091784)
         self.std = (0.26733429, 0.25643846, 0.27615047)
         self.num_classes = 100
@@ -912,7 +925,7 @@ class CIFAR100Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR100(root=self.root_dir, train=True, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, train=True, transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -930,7 +943,7 @@ class CIFAR100Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR100(root=self.root_dir, train=False, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, train=False, transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -1081,6 +1094,36 @@ class FashionMNISTData(TensorData):
         self.in_channels = 1
 
 
+class RandomMinimizedCIFAR10Data(CIFAR10Data):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(CIFAR10, dataset_size, random.randint(0, dataset_size))
+
+
+class RandomMinimizedCIFAR100Data(CIFAR100Data):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(CIFAR100, dataset_size, random.randint(0, dataset_size))
+
+
+class RandomMinimizedGroceryStoreData(GroceryStoreData):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(GroceryStore, dataset_size, random.randint(0, dataset_size))
+
+
+class RandomMinimizedSVHNData(SVHNData):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(SVHN, dataset_size, random.randint(0, dataset_size))
+
+
+class RandomMinimizedTinyImageNetData(TinyImageNetData):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(TinyImageNet, dataset_size, random.randint(0, dataset_size))
+
+
 all_datasets = {
     "cifar10": CIFAR10Data,
     "cifar100": CIFAR100Data,
@@ -1099,6 +1142,18 @@ all_datasets = {
     "fractaldb60": FractalDB60Data
 }
 
+all_datasets_minimized = {
+    "cifar10": RandomMinimizedCIFAR10Data,
+    "cifar100": RandomMinimizedCIFAR100Data,
+    "grocerystore": RandomMinimizedGroceryStoreData,
+    "svhn": RandomMinimizedSVHNData,
+    "tinyimagenet": RandomMinimizedTinyImageNetData
+}
+
 
 def get_dataset(name):
     return all_datasets.get(name)
+
+
+def get_dataset_minimized(name):
+    return all_datasets_minimized.get(name)
