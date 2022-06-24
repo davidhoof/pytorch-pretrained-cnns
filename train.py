@@ -15,11 +15,18 @@ import wandb
 
 def start_training(args):
     seed_everything(args["seed"])
-    os.environ["CUDA_VISIBLE_DEVICES"] = args["gpu_id"]
+
+    if not args['wandb_sweep']:
+        os.environ["CUDA_VISIBLE_DEVICES"] = args["gpu_id"]
 
     data_dir = os.path.join(args["data_dir"], args["dataset"])
-    data = datasets.get_dataset(args["dataset"])(data_dir, args["batch_size"], args["num_workers"])
+    data = None
 
+    if args['dataset_percentage'] == 100:
+        data = datasets.get_dataset(args["dataset"])(data_dir, args["batch_size"], args["num_workers"])
+    if 100 > args['dataset_percentage'] > 0:
+        data = datasets.get_dataset_minimized(args["dataset"])(data_dir, args["batch_size"], args["num_workers"],
+                                                               args['dataset_percentage'])
     args["num_classes"] = data.num_classes
     args["in_channels"] = data.in_channels
 
@@ -157,6 +164,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--start_step", type=int, default=0)
     parser.add_argument("--num_workers", type=int, default=min(8, os.cpu_count()))
+    parser.add_argument("--dataset_percentage", type=check_in_range, default=100)
     parser.add_argument("--cudnn_non_deterministic", type=str2bool, default=True)
     parser.add_argument("--gpu_id", type=str, default="0")
 
@@ -174,6 +182,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", type=str2bool, default=False)
     parser.add_argument("--profiler", type=str, default=None)
     parser.add_argument("--wandb", type=str, default=None)
+    parser.add_argument("--wandb_sweep", type=str2bool, default=False)
 
     parser.add_argument("--extra1", type=str, default=None)
     parser.add_argument("--extra2", type=str, default=None)

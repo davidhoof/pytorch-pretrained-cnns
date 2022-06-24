@@ -146,3 +146,4 @@ dmypy.json
 .idea/other.xml
 .idea/workspace.xml
 /dataset_tester.py
+/wandb/

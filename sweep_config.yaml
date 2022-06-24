@@ -1,0 +1,59 @@
+wandb:
+  username: "dhoof"
+  sweep_dir: "../python_files_sweep"
+  project_format_string: "test2SWEEP{dataset}"
+setup:  
+  mode: "train"
+  data_dir: "../datasets"
+  checkpoints: "all"
+  reset_head: False
+  replace_fc: True
+  output_dir: "../output"
+  postfix: ""
+  precision: 32
+  num_workers: 8
+  cudnn_non_deterministic: True
+  gpu_id: 0
+  momentum: 0.9
+  freeze: None
+  cutmix_prob: 0
+  seed: 0
+  verbose: False
+  profiler: None
+  wandb_sweep: True
+  extra1: None
+  extra2: None
+  models: ["lowres_resnet9","lowres_resnet50","lowres_densenet121","lowres_vgg16_bn"]
+  datasets: ["cifar10"]
+  checkpoint_inputs:
+    - dataset_trained_on: "cifar10"
+      version: 0
+    - dataset_trained_on: "cifar100"
+      version: 0
+    - dataset_trained_on: "grocerystore"
+      version: 0
+    - dataset_trained_on: "svhn"
+      version: 0
+    - dataset_trained_on: "tinyimagenet"
+      version: 0
+hyperparameters:
+  method: bayes
+  metric:
+    name: acc/val
+    goal: maximize
+  parameters:
+    learning_rate:
+      min: 0.00001
+      max: 0.1
+    optimizer:
+      values: ["adam", "sgd", "adagrad", "rmsprop", "adamw"]
+    batch_size:
+      value: 128
+    scheduler:
+      value: "None"
+    max_epochs:
+      min: 10
+      max: 60
+    weight_decay:
+      min: 0.0001
+      max: 0.1
