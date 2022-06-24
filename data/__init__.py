@@ -499,7 +499,7 @@ class Flowers(Dataset):
         if self._check_exists():
             return
         download_and_extract_archive(self._DATASET_URL, download_root=self.root, md5=self._DATASET_MD5)
-        download_url(self._LABELS_URL, root=self.root, md5=self._LABELS_URL)
+        download_url(self._LABELS_URL, root=self.root, md5=self._LABELS_MD5)
 
 
 class FlowersData(pl.LightningDataModule):
