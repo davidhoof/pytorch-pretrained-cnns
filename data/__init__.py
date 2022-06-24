@@ -508,6 +508,7 @@ class FlowersData(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = Flowers
         self.mean = (0.5948, 0.4397, 0.3666)
         self.std = (0.2670, 0.2391, 0.2838)
         self.num_classes = 102
@@ -523,7 +524,7 @@ class FlowersData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = Flowers(root=self.root_dir, split="train", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, split="train", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -542,7 +543,7 @@ class FlowersData(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = Flowers(root=self.root_dir, split="val", transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, split="val", transform=transform, download=True)
         dataloader = DataLoader(
             dataset,
             batch_size=self.batch_size,
@@ -588,6 +589,7 @@ class CUB2002011Data(pl.LightningDataModule):
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_class = CUB2002011
         self.mean = (0.4776, 0.4798, 0.4124)
         self.std = (0.2138, 0.2093, 0.2410)
         self.num_classes = 200
@@ -603,7 +605,7 @@ class CUB2002011Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CUB2002011(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -632,7 +634,7 @@ class CUB2002011Data(pl.LightningDataModule):
                 transforms.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CUB2002011(root=self.root_dir, transform=transform, download=True)
+        dataset = self.data_class(root=self.root_dir, transform=transform, download=True)
 
         num_train = len(dataset)
         indices = list(range(num_train))
@@ -1324,6 +1326,16 @@ class RandomMinimizedTinyImageNetData(TinyImageNetData):
     def __init__(self, root_dir, batch_size, num_workers, dataset_size):
         super().__init__(root_dir, batch_size, num_workers)
         self.data_class = utils.minimize_dataset(TinyImageNet, dataset_size, random.randint(0, dataset_size))
+
+class RandomMinimizedFlowersData(FlowersData):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(Flowers, dataset_size, random.randint(0, dataset_size))
+
+class RandomMinimizedCUB2002011Data(CUB2002011Data):
+    def __init__(self, root_dir, batch_size, num_workers, dataset_size):
+        super().__init__(root_dir, batch_size, num_workers)
+        self.data_class = utils.minimize_dataset(CUB2002011, dataset_size, random.randint(0, dataset_size))
 
 
 all_datasets = {
