@@ -1363,7 +1363,9 @@ all_datasets_minimized = {
     "cifar100": RandomMinimizedCIFAR100Data,
     "grocerystore": RandomMinimizedGroceryStoreData,
     "svhn": RandomMinimizedSVHNData,
-    "tinyimagenet": RandomMinimizedTinyImageNetData
+    "tinyimagenet": RandomMinimizedTinyImageNetData,
+    "flowers": RandomMinimizedFlowersData,
+    "cub2002011": RandomMinimizedCUB2002011Data
 }
 
 
