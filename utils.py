@@ -4,6 +4,7 @@ import torch
 from tqdm import tqdm
 from pytorch_lightning.callbacks import ModelCheckpoint, base
 import argparse
+from sklearn.model_selection import train_test_split
 import datetime
 
 
@@ -25,6 +26,7 @@ class ExtendedModelCheckpoint(ModelCheckpoint):
 class MyCheckpoint(ExtendedModelCheckpoint):
     def __init__(self, **kwargs):
         super(MyCheckpoint, self).__init__(save_first=False, **kwargs)
+
 
 class TimeMonitor(base.Callback):
 
@@ -84,13 +86,23 @@ def check_in_range(value):
 def minimize_dataset(dataset_func, dataset_size=10, random_value=0):
     def modified_dataset(**kwargs):
         dataset = dataset_func(**kwargs)
-        num_train = len(dataset)
-        indices = list(range(num_train))
-        split = int(np.floor((dataset_size / 100) * num_train))
 
-        dataset_idx = indices[0 + dataset_size * int(
-            random_value % np.floor(100 / dataset_size)):split + dataset_size * int(
-            random_value % np.floor(100 / dataset_size))]
-        return torch.utils.data.Subset(dataset, dataset_idx)
+        if hasattr(dataset, "targets"):
+            targets = list(dataset.targets)
+        elif hasattr(dataset, "labels"):
+            targets = list(dataset.labels)
+        else:
+            raise NotImplementedError(
+                f"{dataset.__class__.__name__} has no attribute names targets or labels. "
+                f"This attribute is required for minimizing a dataset")
+
+        train_indices, _ = train_test_split(
+            np.arange(len(dataset)),
+            train_size=(dataset_size / 100),
+            stratify=targets,
+            random_state=random_value,
+        )
+
+        return torch.utils.data.Subset(dataset, train_indices)
 
     return modified_dataset

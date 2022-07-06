@@ -11,7 +11,7 @@ import pandas as pd
 import pytorch_lightning as pl
 import torch.utils.data
 from PIL import Image
-from torch.utils.data import DataLoader, SubsetRandomSampler
+from torch.utils.data import DataLoader, SubsetRandomSampler, Subset
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, KMNIST, FashionMNIST, ImageFolder, SVHN, SUN397
@@ -114,6 +114,7 @@ class GroceryStore(Dataset):
         assert split in ['train', 'val', 'test']
         self.root = root
         self.samples_frame = []
+        self.targets = []
         self.transform = transform
 
         if download:
@@ -132,6 +133,7 @@ class GroceryStore(Dataset):
 
         with open(os.path.join(root, "dataset", dataset_path), "rb") as f:
             self.samples_frame = pd.read_csv(f)
+            self.targets = list(self.samples_frame.iloc[:, 2])
 
     def __len__(self):
         return len(self.samples_frame)
@@ -478,6 +480,7 @@ class Flowers(Dataset):
         paths = glob.glob(os.path.join(self.root, "jpg", "*.jpg"))
         labels = list(scipy.io.loadmat(os.path.join(self.root, self._LABELS_FILE_NAME))['labels'])[0]
         self.samples = list(zip(paths, labels))
+        self.targets = list(map(list, zip(*self.samples)))[1]
 
     def __len__(self):
         return len(self.samples)
@@ -983,6 +986,7 @@ class TinyImageNet(Dataset):
 
         tinp = TinyImageNetPaths(os.path.join(root, "tiny-imagenet-200"))
         self.samples = tinp.paths[mode]
+        self.targets = list(map(list, zip(*self.samples)))[1]
 
     def __len__(self):
         return len(self.samples)
