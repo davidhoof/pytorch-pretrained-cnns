@@ -1,21 +1,23 @@
 wandb:
   username: "dhoof"
   sweep_dir: "../python_files_sweep"
-  project_format_string: "test2SWEEP{dataset}"
+  project_format_string: "SWEEPFREEZE{dataset}"
 setup:  
   mode: "train"
   data_dir: "../datasets"
+  dataset_percentage: 5
   checkpoints: "all"
   reset_head: False
   replace_fc: True
   output_dir: "../output"
   postfix: ""
   precision: 32
+  start_step: 0
   num_workers: 8
   cudnn_non_deterministic: True
   gpu_id: 0
   momentum: 0.9
-  freeze: None
+  freeze: "Conv2d"
   cutmix_prob: 0
   seed: 0
   verbose: False
