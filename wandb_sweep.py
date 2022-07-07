@@ -74,7 +74,7 @@ def main(args):
                 with open(os.path.join(wandb_config['sweep_dir'], project_name,
                                        f"sweep_agent_commands{datetime.now().strftime('%d_%m_%Y_%H')}.txt"),
                           "a+") as f:
-                    f.write(f"wandb agent {wandb_config['username']}/{project_name}/{sweep_id}\n")
+                    f.write(f"wandb agent {wandb_config['username']}/{project_name}/{sweep_id} {model}\n")
 
 
 if __name__ == "__main__":
