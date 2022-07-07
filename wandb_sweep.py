@@ -72,7 +72,7 @@ def main(args):
                 sweep_id = wandb.sweep(hyperparameters, project=project_name)
 
                 with open(os.path.join(wandb_config['sweep_dir'], project_name,
-                                       f"sweep_agent_commands{datetime.now().strftime('%d_%m_%Y_%H_%M')}.txt"),
+                                       f"sweep_agent_commands{datetime.now().strftime('%d_%m_%Y_%H')}.txt"),
                           "a+") as f:
                     f.write(f"wandb agent {wandb_config['username']}/{project_name}/{sweep_id}\n")
 
