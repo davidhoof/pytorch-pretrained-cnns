@@ -83,9 +83,40 @@ def check_in_range(value):
     return ivalue
 
 
-def minimize_dataset(dataset_func, dataset_size=10, random_value=0):
-    def modified_dataset(**kwargs):
-        dataset = dataset_func(**kwargs)
+# def minimize_dataset(dataset_func, dataset_size=10, random_value=0):
+#     def modified_dataset(**kwargs):
+#         dataset = dataset_func(**kwargs)
+#
+#         if hasattr(dataset, "targets"):
+#             targets = list(dataset.targets)
+#         elif hasattr(dataset, "labels"):
+#             targets = list(dataset.labels)
+#         else:
+#             raise NotImplementedError(
+#                 f"{dataset.__class__.__name__} has no attribute names targets or labels. "
+#                 f"This attribute is required for minimizing a dataset")
+#
+#         train_indices, _ = train_test_split(
+#             np.arange(len(dataset)),
+#             train_size=(dataset_size / 100),
+#             stratify=targets,
+#             random_state=random_value,
+#         )
+#
+#         return torch.utils.data.Subset(dataset, train_indices)
+#
+#     return modified_dataset
+
+class minimize_dataset(object):
+
+    def __init__(self, dataset_func, dataset_size=10, random_value=0):
+
+        self.dataset_func = dataset_func
+        self.dataset_size = dataset_size
+        self.random_value = random_value
+
+    def __call__(self, **kwargs):
+        dataset = self.dataset_func(**kwargs)
 
         if hasattr(dataset, "targets"):
             targets = list(dataset.targets)
@@ -98,11 +129,9 @@ def minimize_dataset(dataset_func, dataset_size=10, random_value=0):
 
         train_indices, _ = train_test_split(
             np.arange(len(dataset)),
-            train_size=(dataset_size / 100),
+            train_size=(self.dataset_size / 100),
             stratify=targets,
-            random_state=random_value,
+            random_state=self.random_value,
         )
 
         return torch.utils.data.Subset(dataset, train_indices)
-
-    return modified_dataset
